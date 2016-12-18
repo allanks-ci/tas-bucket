@@ -27,6 +27,7 @@ type Bucket struct {
 }
 
 type Token struct {
+	Id     int    `json:"id"`
 	Bucket int    `json:"bucket"`
 	Job    int    `json:"job"`
 	Email  string `json:"email"`
@@ -126,7 +127,7 @@ func updateBucket(rw http.ResponseWriter, req *http.Request) {
 		}
 		return err
 	}))
-	http.Redirect(rw, req, fmt.Sprintf("/bucket/%v", bucket.Id), 301)
+	http.Redirect(rw, req, fmt.Sprintf("/"), 301)
 }
 
 func remove(rw http.ResponseWriter, req *http.Request) {

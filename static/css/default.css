@@ -23,4 +23,8 @@ input[type=button], input[type=submit], input[type=reset] {
     cursor: pointer;
 }
 
+ul {
+    list-style-type: none;
+}
+
 form { display: inline; }
