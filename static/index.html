@@ -6,23 +6,24 @@
 
   <body>
       <h1>Jobs</h1>
-      <ul>
       {{range .}}
-      <li>
-        <form action="/job/{{.Id}}" method="get">
-          {{.Title}}: 
-          <input type="submit" value="Edit Job"/>
-        </form>
-        <form action="/remove/{{.Id}}" method="get">
-          <input type="submit" value="Delete Job"/>
-        </form>
-      </li>
+      <ul>
+        <li>
+          {{.Bucket.Title}}
+          <form action="/create/{{.Id}}" method="get">
+            <input type="submit" value="Edit"/>
+          </form>
+          <form action="/remove/{{.Id}}" method="get">
+            <input type="submit" value="Delete"/>
+          </form>
+        </li>
+        {{range .Tokens}}
+        <li>{{.Job}}:{{.Email}}</li>
+        {{end}}
+      </ul>
       {{end}}
-      <li>
-      <form action="/job/0" method="get">
+      <form action="/create/0" method="get">
         <input type="submit" value="Create New Job"/>
       </form>
-      </li>
-    </ul>
   </body>
 </html>
