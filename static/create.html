@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>  
+  <head>
+    <link rel="stylesheet" href="/css/default.css" />
+  </head>
+      
+  <body>
+    <form action="/job/{{.Id}}" method="post">
+      Title<br>
+      <input type="text" name="Title" value="{{.Title}}" /><br>
+      Description<br>
+      <textarea name="Description">{{.Description}}</textarea><br>
+      <input type="submit" value="Save">
+    </form>
+    <form action="/" method="get">
+      <input type="submit" value="Exit">
+    </form>
+    <input type="reset" name="Reset">
+  </body>
+</html>

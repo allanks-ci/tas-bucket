@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html> 
+  <head>
+    <link rel="stylesheet" href="/css/default.css" />
+  </head>
+
+  <body>
+      <h1>Jobs</h1>
+      <ul>
+      {{range .}}
+      <li>
+        <form action="/job/{{.Id}}" method="get">
+          {{.Title}}: 
+          <input type="submit" value="Edit Job"/>
+        </form>
+        <form action="/remove/{{.Id}}" method="get">
+          <input type="submit" value="Delete Job"/>
+        </form>
+      </li>
+      {{end}}
+      <li>
+      <form action="/job/0" method="get">
+        <input type="submit" value="Create New Job"/>
+      </form>
+      </li>
+    </ul>
+  </body>
+</html>

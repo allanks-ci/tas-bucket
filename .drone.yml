@@ -1,0 +1,33 @@
+build:
+  image: golang
+  commands:
+    - go get
+    - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+  when:
+    event: push
+
+publish:
+  docker:
+    username: allanks
+    password: $$DOCKER_PASSWORD
+    email: $$EMAIL
+    repo: allanks/tas-bucket
+    when:
+      branch: master
+      event: push
+
+  ssh:
+    host: $$HOST
+    user: root
+    commands:
+      - docker login -u allanks -p $$DOCKER_PASSWORD
+      - docker pull allanks/tas-bucket
+      - echo "Stopping tas-bucket"
+      - docker stop tas-bucket
+      - echo "Removing tas-bucket"
+      - docker rm tas-bucket
+      - echo "Starting tas-bucket"
+      - docker run -d -e "IO_TAZZY_SECRET=$$TAZZY_SECRET" -e "APP_SHORTCODE=bucket" -v /db/bolt/tas-bucket:/db --name tas-bucket -p 8083:8080 allanks/tas-bucket
+    when:
+      branch: master
+      event: push
