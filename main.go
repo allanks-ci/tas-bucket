@@ -176,10 +176,10 @@ func getBucketList(tenant string) *bytes.Buffer {
 	return buffer
 }
 
-func getTokensInBucket(tenant string) *bytes.Buffer {
+func getTokens(tenant string) *bytes.Buffer {
 	buffer := bytes.NewBuffer([]byte{})
 	db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket(getTenantBucket(tenant)).Cursor()
+		c := tx.Bucket(getTenantCandidate(tenant)).Cursor()
 		buffer.WriteString("[")
 		k, v := c.First()
 		if k != nil {
@@ -201,7 +201,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 	infoLog.Printf("BasePage Bucket json error: %v", decoder.Decode(&buckets))
 
 	var tokens []Token
-	tokenDecoder := json.NewDecoder(getTokensInBucket(req.Header.Get("tazzy-tenant")))
+	tokenDecoder := json.NewDecoder(getTokens(req.Header.Get("tazzy-tenant")))
 	infoLog.Printf("BasePage Token json error: %v", tokenDecoder.Decode(&tokens))
 
 	t, err := template.ParseFiles("static/index.html")

@@ -28,6 +28,11 @@ ul {
     border: 1px solid black;
 }
 
+li:first-child {
+    background: yellow;
+    border: 1px solid black;
+}
+
 div {
     display: inline-block;
     vertical-align: top;
