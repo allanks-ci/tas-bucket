@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
@@ -17,6 +19,10 @@ type Token struct {
 	Job    int    `json:"job"`
 	Email  string `json:"email"`
 }
+
+var fatalLog = log.New(os.Stdout, "FATAL: ", log.LstdFlags)
+
+var db *bolt.DB
 
 func main() {
 	var err error
