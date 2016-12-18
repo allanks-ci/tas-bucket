@@ -25,6 +25,12 @@ input[type=button], input[type=submit], input[type=reset] {
 
 ul {
     list-style-type: none;
+    border: 1px solid black;
+}
+
+div {
+    display: inline-block;
+    vertical-align: top;
 }
 
 form { display: inline; }

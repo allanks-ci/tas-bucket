@@ -6,20 +6,22 @@
 
   <body>
       {{range .}}
-      <ul>
-        <li>
-          {{.Bucket.Title}}
-          <form action="/create/{{.Bucket.Id}}" method="get">
-            <input type="submit" value="Edit"/>
-          </form>
-          <form action="/remove/{{.Bucket.Id}}" method="get">
-            <input type="submit" value="Delete"/>
-          </form>
-        </li>
-        {{range .Tokens}}
-        <li>{{.Job}}:{{.Email}}</li>
-        {{end}}
-      </ul>
+      <div>
+        <ul>
+          <li>
+            {{.Bucket.Title}}
+            <form action="/create/{{.Bucket.Id}}" method="get">
+              <input type="submit" value="Edit"/>
+            </form>
+            <form action="/remove/{{.Bucket.Id}}" method="get">
+              <input type="submit" value="Delete"/>
+            </form>
+          </li>
+          {{range .Tokens}}
+          <li>{{.Job}}:{{.Email}}</li>
+          {{end}}
+        </ul>
+      </div>
       {{end}}
       <form action="/create/0" method="get">
         <input type="submit" value="Add Bucket"/>
