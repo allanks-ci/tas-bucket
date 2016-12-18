@@ -9,10 +9,10 @@
       <ul>
         <li>
           {{.Bucket.Title}}
-          <form action="/create/{{.Id}}" method="get">
+          <form action="/create/{{.Bucket.Id}}" method="get">
             <input type="submit" value="Edit"/>
           </form>
-          <form action="/remove/{{.Id}}" method="get">
+          <form action="/remove/{{.Bucket.Id}}" method="get">
             <input type="submit" value="Delete"/>
           </form>
         </li>
