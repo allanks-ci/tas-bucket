@@ -156,7 +156,7 @@ func remove(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bid, err := strconv.Atoi(vars["bucket"])
 	infoLog.Printf("Remove strconv error: %v", err)
-	infoLog.Printf("Remove bolt error: %v", db.Batch(func(tx *bolt.Tx) error {
+	infoLog.Printf("Remove bolt error: %v", db.Update(func(tx *bolt.Tx) error {
 		var buckets Buckets
 		decoder := json.NewDecoder(getListFromBolt(getTenantBucket(req.Header.Get("tazzy-tenant"))))
 		infoLog.Printf("Remove json error: %v", decoder.Decode(&buckets))
@@ -182,7 +182,7 @@ func toRight(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bid, err := strconv.Atoi(vars["bucket"])
 	infoLog.Printf("Move strconv error: %v", err)
-	infoLog.Printf("Move bolt error: %v", db.Batch(func(tx *bolt.Tx) error {
+	infoLog.Printf("Move bolt error: %v", db.Update(func(tx *bolt.Tx) error {
 		var buckets Buckets
 		decoder := json.NewDecoder(getListFromBolt(getTenantBucket(req.Header.Get("tazzy-tenant"))))
 		infoLog.Printf("Move json error: %v", decoder.Decode(&buckets))
@@ -211,13 +211,13 @@ func toLeft(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bid, err := strconv.Atoi(vars["bucket"])
 	infoLog.Printf("Move strconv error: %v", err)
-	infoLog.Printf("Move bolt error: %v", db.Batch(func(tx *bolt.Tx) error {
+	infoLog.Printf("Move bolt error: %v", db.Update(func(tx *bolt.Tx) error {
 		var buckets Buckets
 		decoder := json.NewDecoder(getListFromBolt(getTenantBucket(req.Header.Get("tazzy-tenant"))))
 		infoLog.Printf("Move json error: %v", decoder.Decode(&buckets))
 		sort.Sort(buckets)
 		b := tx.Bucket(getTenantBucket(req.Header.Get("tazzy-tenant")))
-		for i, bucket := range buckets {
+		for i, bucket := range buckets[1:] {
 			if bucket.Id == bid && bucket.Position == 1 {
 				break
 			} else if bucket.Id == bid {
