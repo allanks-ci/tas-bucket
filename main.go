@@ -381,7 +381,6 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 			Tokens: bTokens,
 		})
 	}
-	rw.Header().Write(w)
 	t.Execute(rw, data)
 }
 
