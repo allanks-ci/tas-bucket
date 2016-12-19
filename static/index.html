@@ -31,11 +31,11 @@
             </form>
           </li>
           <li>
-            <form action="/move/{{.Bucket.Id}}/toRight" method="get">
-              <input type="submit" value="Move Right"/>
-            </form>
             <form action="/move/{{.Bucket.Id}}/toLeft" method="get">
               <input type="submit" value="Move Left"/>
+            </form>
+            <form action="/move/{{.Bucket.Id}}/toRight" method="get">
+              <input type="submit" value="Move Right"/>
             </form>
           </li>
         </ul>
