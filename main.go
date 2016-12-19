@@ -11,7 +11,6 @@ import (
 	"os"
 	"sort"
 	"strconv"
-	"time"
 
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
@@ -101,10 +100,6 @@ func create(rw http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		updateBucket(rw, req)
 	} else {
-		rw.Header().Set("Cache-Control", "no-cache, private, max-age=0")
-		rw.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
-		rw.Header().Set("Pragma", "no-cache")
-		rw.Header().Set("X-Accel-Expires", "0")
 		vars := mux.Vars(req)
 		t, err := template.ParseFiles("static/create.html")
 		infoLog.Printf("Create template error: %v", err)
@@ -154,7 +149,7 @@ func updateBucket(rw http.ResponseWriter, req *http.Request) {
 		}
 		return err
 	}))
-	http.Redirect(rw, req, fmt.Sprintf("/"), 301)
+	basePage(rw, req)
 }
 
 func remove(rw http.ResponseWriter, req *http.Request) {
@@ -180,7 +175,7 @@ func remove(rw http.ResponseWriter, req *http.Request) {
 		}
 		return nil
 	}))
-	http.Redirect(rw, req, "/", 301)
+	basePage(rw, req)
 }
 
 func toRight(rw http.ResponseWriter, req *http.Request) {
@@ -211,7 +206,7 @@ func toRight(rw http.ResponseWriter, req *http.Request) {
 		}
 		return nil
 	}))
-	http.Redirect(rw, req, "/", 301)
+	basePage(rw, req)
 }
 
 func toLeft(rw http.ResponseWriter, req *http.Request) {
@@ -240,7 +235,7 @@ func toLeft(rw http.ResponseWriter, req *http.Request) {
 		}
 		return nil
 	}))
-	http.Redirect(rw, req, "/", 301)
+	basePage(rw, req)
 }
 
 func apply(rw http.ResponseWriter, req *http.Request) {
@@ -386,10 +381,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 			Tokens: bTokens,
 		})
 	}
-	rw.Header().Set("Cache-Control", "no-cache, private, max-age=0")
-	rw.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
-	rw.Header().Set("Pragma", "no-cache")
-	rw.Header().Set("X-Accel-Expires", "0")
+	rw.Header().Write(w)
 	t.Execute(rw, data)
 }
 
