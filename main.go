@@ -200,6 +200,8 @@ func toRight(rw http.ResponseWriter, req *http.Request) {
 				data, _ = json.Marshal(&buckets[i+1])
 				b.Put(itob(buckets[i+1].Id), data)
 				break
+			} else if i == buckets.Len()-1 {
+				infoLog.Printf("Cannot move beyond end position")
 			}
 		}
 		return nil
@@ -219,6 +221,7 @@ func toLeft(rw http.ResponseWriter, req *http.Request) {
 		b := tx.Bucket(getTenantBucket(req.Header.Get("tazzy-tenant")))
 		for i, bucket := range buckets[1:] {
 			if bucket.Id == bid && bucket.Position == 1 {
+				infoLog.Printf("Cannot below base position")
 				break
 			} else if bucket.Id == bid {
 				bucket.Position--
