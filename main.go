@@ -11,6 +11,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/boltdb/bolt"
 	"github.com/gorilla/mux"
@@ -100,6 +101,10 @@ func create(rw http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		updateBucket(rw, req)
 	} else {
+		rw.Header().Set("Cache-Control", "no-cache, private, max-age=0")
+		rw.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
+		rw.Header().Set("Pragma", "no-cache")
+		rw.Header().Set("X-Accel-Expires", "0")
 		vars := mux.Vars(req)
 		t, err := template.ParseFiles("static/create.html")
 		infoLog.Printf("Create template error: %v", err)
@@ -381,6 +386,10 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 			Tokens: bTokens,
 		})
 	}
+	rw.Header().Set("Cache-Control", "no-cache, private, max-age=0")
+	rw.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
+	rw.Header().Set("Pragma", "no-cache")
+	rw.Header().Set("X-Accel-Expires", "0")
 	t.Execute(rw, data)
 }
 
