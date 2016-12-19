@@ -16,10 +16,10 @@
             <form action="/remove/{{.Bucket.Id}}" method="get">
               <input type="submit" value="Delete"/>
             </form>
-            <form action="/move/{{.Bucket.Id}}/to/{{.Bucket.Position}}" method="get">
+            <form action="/move/{{.Bucket.Id}}/toRight" method="get">
               <input type="submit" value="Move Right"/>
             </form>
-            <form action="/move/{{.Bucket.Id}}/to/{{.Bucket.Position}}" method="get">
+            <form action="/move/{{.Bucket.Id}}/toLeft" method="get">
               <input type="submit" value="Move Left"/>
             </form>
             <form action="/remove/{{.Bucket.Id}}" method="get">
