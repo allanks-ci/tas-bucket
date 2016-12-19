@@ -10,21 +10,6 @@
         <ul>
           <li>
             {{.Bucket.Position}}:{{.Bucket.Title}}
-            <form action="/create/{{.Bucket.Id}}" method="get">
-              <input type="submit" value="Edit"/>
-            </form>
-            <form action="/remove/{{.Bucket.Id}}" method="get">
-              <input type="submit" value="Delete"/>
-            </form>
-            <form action="/move/{{.Bucket.Id}}/toRight" method="get">
-              <input type="submit" value="Move Right"/>
-            </form>
-            <form action="/move/{{.Bucket.Id}}/toLeft" method="get">
-              <input type="submit" value="Move Left"/>
-            </form>
-            <form action="/remove/bucket/{{.Bucket.Id}}" method="get">
-              <input type="submit" value="Delete"/>
-            </form>
           </li>
           {{range .Tokens}}
           <li>
@@ -37,6 +22,22 @@
             </form>
           </li>
           {{end}}
+          <li>
+            <form action="/create/{{.Bucket.Id}}" method="get">
+              <input type="submit" value="Edit"/>
+            </form>
+            <form action="/remove/{{.Bucket.Id}}" method="get">
+              <input type="submit" value="Delete"/>
+            </form>
+          </li>
+          <li>
+            <form action="/move/{{.Bucket.Id}}/toRight" method="get">
+              <input type="submit" value="Move Right"/>
+            </form>
+            <form action="/move/{{.Bucket.Id}}/toLeft" method="get">
+              <input type="submit" value="Move Left"/>
+            </form>
+          </li>
         </ul>
       </div>
       {{end}}
