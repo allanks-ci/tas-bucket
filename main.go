@@ -235,6 +235,84 @@ func toLeft(rw http.ResponseWriter, req *http.Request) {
 	http.Redirect(rw, req, "/", 301)
 }
 
+func apply(rw http.ResponseWriter, req *http.Request) {
+	decoder := json.NewDecoder(req.Body)
+	var token Token
+	err := decoder.Decode(&token)
+	if err != nil {
+		panic(err)
+	}
+	defer req.Body.Close()
+	tenant := req.Header.Get("tazzy-tenant")
+	infoLog.Printf("Updatebucket bolt error: %v", db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(getTenantCandidate(tenant))
+		id, _ := b.NextSequence()
+		token.Id = int(id)
+		data, err := json.Marshal(&token)
+		if err == nil {
+			return b.Put(itob(token.Id), data)
+		}
+		return err
+	}))
+	rw.WriteHeader(200)
+}
+
+func advance(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	tid, err := strconv.Atoi(vars["token"])
+	infoLog.Printf("Advance strconv error: %v", err)
+	var token Token
+	decoder := json.NewDecoder(getTokenFromBolt(tid, req.Header.Get("tazzy-tenant")))
+	infoLog.Printf("Advance json error: %v", decoder.Decode(&token))
+
+	var buckets Buckets
+	bucketDecoder := json.NewDecoder(getBucketList(req.Header.Get("tazzy-tenant")))
+	infoLog.Printf("Advance Bucket json error: %v", bucketDecoder.Decode(&buckets))
+
+	var position int
+	for _, bucket := range buckets {
+		if bucket.Id == token.Bucket {
+			position = bucket.Position
+			break
+		}
+	}
+
+	var newId int
+	for _, bucket := range buckets {
+		if bucket.Position == position+1 {
+			newId = bucket.Id
+		}
+	}
+
+	if newId == 0 {
+		http.Redirect(rw, req, "/remove/token/{token}", 301)
+		return
+	}
+
+	infoLog.Printf("Advance bolt error: %v", db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(getTenantCandidate(req.Header.Get("tazzy-tenant")))
+		token.Bucket = newId
+		data, err := json.Marshal(&token)
+		if err == nil {
+			return b.Put(itob(token.Id), data)
+		}
+		return err
+	}))
+	http.Redirect(rw, req, "/", 301)
+}
+
+func removeToken(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	tid, err := strconv.Atoi(vars["token"])
+	infoLog.Printf("Remove strconv error: %v", err)
+	infoLog.Printf("Remove bolt error: %v", db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(getTenantCandidate(req.Header.Get("tazzy-tenant")))
+		b.Delete(itob(tid))
+		return nil
+	}))
+	http.Redirect(rw, req, "/", 301)
+}
+
 func itob(v int) []byte {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(v))
@@ -265,6 +343,16 @@ func getBucketList(tenant string) *bytes.Buffer {
 			}
 		}
 		buffer.WriteString("]")
+		return nil
+	})
+	return buffer
+}
+
+func getTokenFromBolt(tid int, tenant string) *bytes.Buffer {
+	buffer := bytes.NewBuffer([]byte{})
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(getTenantCandidate(tenant))
+		buffer.Write(b.Get(itob(tid)))
 		return nil
 	})
 	return buffer
@@ -332,8 +420,11 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", basePage)
+	r.HandleFunc("/apply", apply)
+	r.HandleFunc("/advance/{token}", advance)
 	r.HandleFunc("/create/{bucket}", create)
-	r.HandleFunc("/remove/{bucket}", remove)
+	r.HandleFunc("/remove/bucket/{bucket}", remove)
+	r.HandleFunc("/remove/token/{token}", removeToken)
 	r.HandleFunc("/move/{bucket}/toLeft", toLeft)
 	r.HandleFunc("/move/{bucket}/toRight", toRight)
 	r.HandleFunc("/tas/core/tenants", newTenant)

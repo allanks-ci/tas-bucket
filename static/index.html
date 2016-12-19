@@ -9,7 +9,7 @@
       <div>
         <ul>
           <li>
-            {{.Bucket.Title}}
+            {{.Bucket.Position}}:{{.Bucket.Title}}
             <form action="/create/{{.Bucket.Id}}" method="get">
               <input type="submit" value="Edit"/>
             </form>
@@ -22,12 +22,20 @@
             <form action="/move/{{.Bucket.Id}}/toLeft" method="get">
               <input type="submit" value="Move Left"/>
             </form>
-            <form action="/remove/{{.Bucket.Id}}" method="get">
+            <form action="/remove/bucket/{{.Bucket.Id}}" method="get">
               <input type="submit" value="Delete"/>
             </form>
           </li>
           {{range .Tokens}}
-          <li>{{.Job}}:{{.Email}}</li>
+          <li>
+            {{.Job}}:{{.Email}}
+            <form action="/advance/{{.Id}}" method="get">
+              <input type="submit" value="Advance"/>
+            </form>
+            <form action="/remove/token/{{.Id}}" method="get">
+              <input type="submit" value="Delete"/>
+            </form>
+          </li>
           {{end}}
         </ul>
       </div>
