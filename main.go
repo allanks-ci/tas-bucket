@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 
 	"github.com/boltdb/bolt"
@@ -24,6 +25,20 @@ type Bucket struct {
 	Id       int    `json:"id"`
 	Title    string `json:"title"`
 	Position int    `json:"position"`
+}
+
+type Buckets []Bucket
+
+func (slice Buckets) Len() int {
+	return len(slice)
+}
+
+func (slice Buckets) Less(i, j int) bool {
+	return slice[i].Position < slice[j].Position
+}
+
+func (slice Buckets) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
 }
 
 type Token struct {
@@ -43,8 +58,9 @@ var infoLog = log.New(os.Stdout, "INFO: ", log.LstdFlags)
 var db *bolt.DB
 
 var appliedBucket = []Bucket{Bucket{
-	Id:    0,
-	Title: "Applied",
+	Id:       0,
+	Title:    "Applied",
+	Position: 0,
 }}
 
 func getTenantBucket(tenant string) []byte {
@@ -108,7 +124,8 @@ func updateBucket(rw http.ResponseWriter, req *http.Request) {
 	}
 	tenant := req.Header.Get("tazzy-tenant")
 	bid, err := strconv.Atoi(vars["bucket"])
-	infoLog.Printf("UpdateJob strconv error: %v", err)
+	infoLog.Printf("UpdateBucket strconv error: %v", err)
+
 	var bucket Bucket
 	bucket = Bucket{
 		Id:    bid,
@@ -118,8 +135,13 @@ func updateBucket(rw http.ResponseWriter, req *http.Request) {
 		b := tx.Bucket(getTenantBucket(tenant))
 		// Check if this is a new bucket
 		if bid == 0 {
+			var buckets Buckets
+			decoder := json.NewDecoder(getBucketList(req.Header.Get("tazzy-tenant")))
+			infoLog.Printf("UpdateBucket json error: %v", decoder.Decode(&buckets))
+
 			id, _ := b.NextSequence()
 			bucket.Id = int(id)
+			bucket.Position = buckets.Len() + 1
 		}
 		data, err := json.Marshal(&bucket)
 		if err == nil {
@@ -134,9 +156,81 @@ func remove(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bid, err := strconv.Atoi(vars["bucket"])
 	infoLog.Printf("Remove strconv error: %v", err)
-	infoLog.Printf("Remove bolt error: %v", db.Update(func(tx *bolt.Tx) error {
+	infoLog.Printf("Remove bolt error: %v", db.Batch(func(tx *bolt.Tx) error {
+		var buckets Buckets
+		decoder := json.NewDecoder(getBucketList(req.Header.Get("tazzy-tenant")))
+		infoLog.Printf("Remove json error: %v", decoder.Decode(&buckets))
+		sort.Sort(buckets)
 		b := tx.Bucket(getTenantBucket(req.Header.Get("tazzy-tenant")))
-		return b.Delete(itob(bid))
+		var position int
+		for _, bucket := range buckets {
+			if bucket.Id == bid {
+				position = bucket.Position
+				b.Delete(itob(bid))
+			} else if position != 0 && bucket.Position > position {
+				bucket.Position--
+				data, _ := json.Marshal(&bucket)
+				b.Put(itob(bucket.Id), data)
+			}
+		}
+		return nil
+	}))
+	http.Redirect(rw, req, "/", 301)
+}
+
+func toRight(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	bid, err := strconv.Atoi(vars["bucket"])
+	infoLog.Printf("Move strconv error: %v", err)
+	infoLog.Printf("Move bolt error: %v", db.Batch(func(tx *bolt.Tx) error {
+		var buckets Buckets
+		decoder := json.NewDecoder(getBucketList(req.Header.Get("tazzy-tenant")))
+		infoLog.Printf("Move json error: %v", decoder.Decode(&buckets))
+		sort.Sort(buckets)
+		if buckets.Len() == 0 {
+			return nil
+		}
+		b := tx.Bucket(getTenantBucket(req.Header.Get("tazzy-tenant")))
+		for i, bucket := range buckets[:buckets.Len()-1] {
+			if bucket.Id == bid {
+				bucket.Position++
+				data, _ := json.Marshal(&bucket)
+				b.Put(itob(bid), data)
+				buckets[i+1].Position--
+				data, _ = json.Marshal(&buckets[i+1])
+				b.Put(itob(buckets[i+1].Id), data)
+				break
+			}
+		}
+		return nil
+	}))
+	http.Redirect(rw, req, "/", 301)
+}
+
+func toLeft(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	bid, err := strconv.Atoi(vars["bucket"])
+	infoLog.Printf("Move strconv error: %v", err)
+	infoLog.Printf("Move bolt error: %v", db.Batch(func(tx *bolt.Tx) error {
+		var buckets Buckets
+		decoder := json.NewDecoder(getBucketList(req.Header.Get("tazzy-tenant")))
+		infoLog.Printf("Move json error: %v", decoder.Decode(&buckets))
+		sort.Sort(buckets)
+		b := tx.Bucket(getTenantBucket(req.Header.Get("tazzy-tenant")))
+		for i, bucket := range buckets[1:] {
+			if bucket.Id == bid && bucket.Position == 1 {
+				break
+			} else if bucket.Id == bid {
+				bucket.Position--
+				data, _ := json.Marshal(&bucket)
+				b.Put(itob(bid), data)
+				buckets[i].Position++
+				data, _ = json.Marshal(&buckets[i])
+				b.Put(itob(buckets[i].Id), data)
+				break
+			}
+		}
+		return nil
 	}))
 	http.Redirect(rw, req, "/", 301)
 }
@@ -196,7 +290,7 @@ func getTokens(tenant string) *bytes.Buffer {
 }
 
 func basePage(rw http.ResponseWriter, req *http.Request) {
-	var buckets []Bucket
+	var buckets Buckets
 	decoder := json.NewDecoder(getBucketList(req.Header.Get("tazzy-tenant")))
 	infoLog.Printf("BasePage Bucket json error: %v", decoder.Decode(&buckets))
 
@@ -211,6 +305,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 	} else {
 		buckets = append(appliedBucket, buckets...)
 	}
+	sort.Sort(buckets)
 	data := []BucketTokens{}
 	for _, b := range buckets {
 		bTokens := []Token{}
@@ -239,6 +334,8 @@ func main() {
 	r.HandleFunc("/", basePage)
 	r.HandleFunc("/create/{bucket}", create)
 	r.HandleFunc("/remove/{bucket}", remove)
+	r.HandleFunc("/move/{bucket}/toLeft", toLeft)
+	r.HandleFunc("/move/{bucket}/toRight", toRight)
 	r.HandleFunc("/tas/core/tenants", newTenant)
 	r.HandleFunc("/tas/core/tenants/{tenant}", deleteTenant)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))

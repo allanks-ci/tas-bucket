@@ -16,6 +16,15 @@
             <form action="/remove/{{.Bucket.Id}}" method="get">
               <input type="submit" value="Delete"/>
             </form>
+            <form action="/move/{{.Bucket.Id}}/to/{{.Bucket.Position}}" method="get">
+              <input type="submit" value="Move Right"/>
+            </form>
+            <form action="/move/{{.Bucket.Id}}/to/{{.Bucket.Position}}" method="get">
+              <input type="submit" value="Move Left"/>
+            </form>
+            <form action="/remove/{{.Bucket.Id}}" method="get">
+              <input type="submit" value="Delete"/>
+            </form>
           </li>
           {{range .Tokens}}
           <li>{{.Job}}:{{.Email}}</li>
