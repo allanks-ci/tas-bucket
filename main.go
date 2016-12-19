@@ -236,9 +236,8 @@ func toLeft(rw http.ResponseWriter, req *http.Request) {
 }
 
 func apply(rw http.ResponseWriter, req *http.Request) {
-	decoder := json.NewDecoder(req.Body)
 	var token Token
-	err := decoder.Decode(&token)
+	err := json.NewDecoder(req.Body).Decode(&token)
 	if err != nil {
 		panic(err)
 	}
