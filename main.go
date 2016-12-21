@@ -394,7 +394,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", basePage)
-	r.HandleFunc("/apply", apply)
+	r.HandleFunc("/tas/devs/allan/submit", apply)
 	r.HandleFunc("/advance/{token}", advance)
 	r.HandleFunc("/create/{bucket}", create)
 	r.HandleFunc("/remove/bucket/{bucket}", remove)
