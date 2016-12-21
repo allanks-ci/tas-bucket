@@ -44,7 +44,7 @@ func (slice Buckets) Swap(i, j int) {
 type Token struct {
 	Id     int    `json:"id"`
 	Bucket int    `json:"bucket"`
-	Job    int    `json:"job"`
+	Job    string `json:"job"`
 	Email  string `json:"email"`
 }
 
