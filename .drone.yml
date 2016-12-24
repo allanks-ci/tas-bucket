@@ -27,7 +27,7 @@ publish:
       - echo "Removing tas-bucket"
       - docker rm tas-bucket
       - echo "Starting tas-bucket"
-      - docker run -d -e "IO_TAZZY_SECRET=$$TAZZY_SECRET" -e "APP_SHORTCODE=bucket" -v /db/bolt/tas-bucket:/db --name tas-bucket -p 8083:8080 allanks/tas-bucket
+      - docker run -d -e "DATABASE=/db/tas-bucket.db" -v /db/bolt/tas-bucket:/db --name tas-bucket -p 8083:8080 allanks/tas-bucket
     when:
       branch: master
       event: push

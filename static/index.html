@@ -2,12 +2,25 @@
 <html> 
   <head>
     <link rel="stylesheet" href="/css/default.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+    $( function() {
+    $( "#buckets" ).sortable();
+    $( "#buckets" ).disableSelection();
+    $( "{{range .}}#{{.Bucket.Title}}{{end}}" ).sortable({
+      connectWith: ".connectedSortable"
+    }).disableSelection();
+  } );
+    </script>
   </head>
 
   <body>
+    <ul id="buckets">
       {{range .}}
-      <div>
-        <ul>
+      <li>
+        <ul id="{{.Bucket.Title}}" class="connectedSortable">
           <li>
             {{.Bucket.Position}}:{{.Bucket.Title}}
           </li>
@@ -39,8 +52,9 @@
             </form>
           </li>
         </ul>
-      </div>
+      </li>
       {{end}}
+    </ul>
       <div>
         <ul>
           <li>

@@ -386,7 +386,7 @@ func basePage(rw http.ResponseWriter, req *http.Request) {
 
 func main() {
 	var err error
-	db, err = bolt.Open("/db/tas-bucket.db", 0644, nil)
+	db, err = bolt.Open(os.Getenv("DATABASE"), 0644, nil)
 	if err != nil {
 		fatalLog.Fatal(err)
 	}
