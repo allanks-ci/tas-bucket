@@ -9,7 +9,7 @@
     $( function() {
     $( "#buckets" ).sortable();
     $( "#buckets" ).disableSelection();
-    $( "{{range .}}#{{.Bucket.Title}}{{end}}" ).sortable({
+    $( "{{range $index, $element := .}}{{if $index}}, {{end}}#{{$element.Bucket.Title}}{{end}}" ).sortable({
       connectWith: ".connectedSortable"
     }).disableSelection();
   } );

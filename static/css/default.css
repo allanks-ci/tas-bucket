@@ -28,6 +28,10 @@ ul {
     border: 1px solid black;
 }
 
+ul#menu li {
+    display:inline;
+}
+
 li:first-child {
     background: yellow;
     border: 1px solid black;
